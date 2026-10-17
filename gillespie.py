@@ -42,40 +42,44 @@ def SSA(prop, stoch, X0, tspan, coeff):
 
 plt.figure(figsize=(10, 6))
 
+
+
 # Kör 10 oberoende simuleringar och plotta dem i samma diagram
 antal_forsok = 10
 for i in range(antal_forsok):
     tvec, Xarr = SSA(
-        sir.propensitetsfunktioner_SEIRDV, 
-        sir.stockiomatris_SEIRDV, 
-        # sir.propensitetsfunktioner_SEIRDVM, 
-        # sir.stockiomatris_SEIRDVM, 
-        sir.Y0, 
+        # sir.propensitetsfunktioner_SEIRDV, 
+        # sir.stockiomatris_SEIRDV, 
+        sir.propensitetsfunktioner_SEIRDVM, 
+        sir.stockiomatris_SEIRDVM, 
+        sir.Y0_SEIRDVM, 
         sir.tspan, 
-        sir.c)
+        sir.c_SEIRDVM)
 
     
-
     if i == 0:
-        plt.plot(tvec, Xarr[:, 0], 'b-', label='Mottagliga (S)', alpha=0.5)
-        plt.plot(tvec, Xarr[:, 1], 'm-', label='Exponerade (E)', alpha=0.5)
-        plt.plot(tvec, Xarr[:, 2], 'r-', label='Infekterade (I)', alpha=0.5)
+        plt.plot(tvec, Xarr[:, 0], 'b-', label='Mottagliga (S)', alpha=0.6)
+        plt.plot(tvec, Xarr[:, 1], 'm-', label='Exponerade (E)', alpha=0.6)
+        plt.plot(tvec, Xarr[:, 2], 'r-', label='Infekterade (I)', alpha=0.6)
         plt.plot(tvec, Xarr[:, 3], 'g-', label='Tillfrisknade (R)', alpha=0.6)
         plt.plot(tvec, Xarr[:, 4], 'k-', label='Döda (D)', alpha=0.6)
         plt.plot(tvec, Xarr[:, 5], 'c-', label='Vaccinerade (V)', alpha=0.6)
-        #plt.plot(tvec, Xarr[:, 6], 'o-', label='Mökertal (M)', alpha=0.6)
+        plt.plot(tvec, Xarr[:, 6], 'y-', label='Mökertal (M)', alpha=0.6) # tillagd för egen modell
     else:
-        plt.plot(tvec, Xarr[:, 0], 'b-', alpha=0.3)
-        plt.plot(tvec, Xarr[:, 1], 'm-', alpha=0.3)
-        plt.plot(tvec, Xarr[:, 2], 'r-', alpha=0.3)
+        plt.plot(tvec, Xarr[:, 0], 'b-', alpha=0.2)
+        plt.plot(tvec, Xarr[:, 1], 'm-', alpha=0.2)
+        plt.plot(tvec, Xarr[:, 2], 'r-', alpha=0.2)
         plt.plot(tvec, Xarr[:, 3], 'g-', alpha=0.2)
         plt.plot(tvec, Xarr[:, 4], 'k-', alpha=0.2)
         plt.plot(tvec, Xarr[:, 5], 'c-', alpha=0.2)
-        #plt.plot(tvec, Xarr[:, 6], 'o-', alpha=0.2)
+        plt.plot(tvec, Xarr[:, 6], 'y-', alpha=0.2) # tillagd för egen modell
+
+
+
 
 plt.xlabel('Tid (t)')
 plt.ylabel('Antal individer')
-plt.title('Stokastisk simulering av SEIRDV')
+plt.title('Stokastisk simulering av SEIRDVM')
 plt.legend()
 plt.grid(True)
 plt.show()
