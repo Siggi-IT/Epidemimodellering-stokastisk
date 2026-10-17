@@ -3,19 +3,32 @@ import random
 
 # ----------- Startvärden --------------
 tspan = [0, 120]
-N = 1000 # startpersoner är 1000 varav 5 smittade (inte med)
-b = 0.3 # andelen mottagliga
-g = 1/7 # andelen sjuka 
-alfa = 0.2 # inkubationstid 
-my = 0.005 # dödlighet 
-v = 8.0 # vaccinationer
-m = 0.5 # andelen mörkertal
+N = 1000       # Startpopulation
+b = 0.3        # Beta (smittotakt)
+g = 1/7        # Gamma (tillfrisknande)
+alfa = 0.2     # Alpha (1 / inkubationstid)
+my = 0.005     # My (dödlighet)
+v = 5.0        # Vaccinationshastighet (personer/dag)
+m = 0.5        # Andel kända/rapporterade fall (p)
 
-c = np.array([b/N, alfa, g, my, v]) # propentitestfunktions array
+# Parametervektorer för olika modeller
+# c_SIR = np.array([b/N, g])
+# c_SEIR = np.array([b/N, alfa, g])
+# c_SEIRD = np.array([b/N, alfa, g, my])
+# c_SEIRDV = np.array([b/N, alfa, g, my, v])
 
+# Starttillstånd för olika modeller
+# Y0_SIR = np.array([995, 5, 0])          # [S, I, R]
+# Y0_SEIR = np.array([995, 0, 5, 0])      # [S, E, I, R]
+# Y0_SEIRD = np.array([995, 0, 5, 0, 0])  # [S, E, I, R, D]
 
-Y0 = np.array([995, 0, 5, 0, 0, 0]) # 5 är smittade i start 0 resistenta, resten mottaglig
-#Y0 = np.array([990, 0, 5, 0, 0, 0, 5]) # 5 bekräftade I, 5 mörkertal M
+# SIERDV
+# c = np.array([b/N, alfa, g, my, v]) # propentitestfunktions array
+# Y0 = np.array([995, 0, 5, 0, 0, 0]) # 5 är smittade i start 0 resistenta, resten mottaglig
+
+# SIERDVM - Nya modellen
+c_SEIRDVM = np.array([b/N, v, alfa, m, g, my])
+Y0_SEIRDVM = np.array([990, 0, 5, 0, 0, 0, 5]) # [S, E, I, R, D, V, M]
 
 # ----------- SIR MODELLEN ---------------
 def stockiomatris():
@@ -55,7 +68,6 @@ def propensitetsfunktioner_SEIR(Y, c):
 
     return np.array([a1, a2, a3])
 
-
 #----------------- SIERD MODELL ------------------------
 def stockiomatris_SEIRD():
     B = np.array([
@@ -77,7 +89,6 @@ def propensitetsfunktioner_SEIRD(Y, c):
     a4 = c4 * I1        # r4: töd (I -> D)
     
     return np.array([a1, a2, a3, a4])
-
 
 
 #----------------- SIERDV MODELL + va ------------------------
@@ -119,14 +130,20 @@ def stockiomatris_SEIRDVM():
     return B
 
 def propensitetsfunktioner_SEIRDVM(Y, c):
-    S1, E1, I1, R1, D1, V1, M1 = Y[0], Y[1], Y[2], Y[3], Y[4], Y[5]
-    c1, c2, c3, c4, c5, c6, c7, c8  = c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7] #reaktionshastigheterna
+    S1, E1, I1, R1, D1, V1, M1 = Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Y[6]
+    # c1 = b/N, c2 = v, c3 = alfa, c4 = m (p), c5 = g, c6 = my
+    c1, c2, c3, c4, c5, c6  = c[0], c[1], c[2], c[3], c[4], c[5] #reaktionshastigheterna
+
+    # Både bekräftade I och okända M bidrar till smittspridningen
+    totalt_smittsamma = I1 + M1
     
-    a1 =   # r1: smitta (S -> E)
-    a2 =   # r2: inkubation (E -> I)
-    a3 =   # r3: tillfrisknande (I -> R)
-    a4 =   # r4: död (I -> D)
-    a5 =   # r5: vaccin (S -> V)
-    a6 =   # r6: 
+    a1 = c1 * S1 * totalt_smittsamma  # r1: Smitta (S -> E)
+    a2 = c2 if S1 > 0 else 0          # r2: Vaccination (S -> V)
+    a3 = c4 * (c3 * E1)               # r3: Känd smitta (E -> I)
+    a4 = (1 - c4) * (c3 * E1)         # r4: Mörkertal (E -> M)
+    a5 = c5 * I1                      # r5: Tillfrisknande I (I -> R)
+    a6 = c5 * M1                      # r6: Tillfrisknande M (M -> R) 
+    a7 = c6 * I1                      # r7: Död I (I -> D)
+    a8 = c6 * M1                      # r8: Död M (M -> D)
 
     return np.array([a1, a2, a3, a4, a5, a6, a7, a8])
