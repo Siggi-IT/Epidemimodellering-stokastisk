@@ -15,7 +15,7 @@ m = 0.5        # Andel kända/rapporterade fall (p)
 # c_SIR = np.array([b/N, g])
 # c_SEIR = np.array([b/N, alfa, g])
 # c_SEIRD = np.array([b/N, alfa, g, my])
-# c_SEIRDV = np.array([b/N, alfa, g, my, v])
+
 
 # Starttillstånd för olika modeller
 # Y0_SIR = np.array([995, 5, 0])          # [S, I, R]
